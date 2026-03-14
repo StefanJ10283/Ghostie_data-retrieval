@@ -311,6 +311,10 @@ def retrieve_by_hash(hash_key: str):
     }
 
 
+# ── Lambda handler (Mangum) ─────────────────────────────────────────────────────
+from mangum import Mangum
+handler = Mangum(app)
+
 # ── Run locally ────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
