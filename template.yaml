@@ -10,9 +10,6 @@ Resources:
       Runtime: python3.12
       Timeout: 30
       MemorySize: 256
-      Environment:
-        Variables:
-          AWS_REGION: ap-southeast-2
       Policies:
         - DynamoDBCrudPolicy:
             TableName: hash_keys
