@@ -1,4 +1,7 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.openapi.utils import get_openapi
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from datetime import datetime
 import json
@@ -28,8 +31,30 @@ scraped_data_table = dynamodb.Table("scraped_data")  # PK: hash_key     (String)
 app = FastAPI(
     title="Ghostie Data Retrieval API",
     description="Retrieves collected data for a business and uses hashing to detect if data has changed since last retrieval.",
-    version="2.0.0"
+    version="2.0.0",
+    docs_url=None,       # disable default /docs — we serve a custom one below
+    redoc_url=None,      # disable default /redoc
+    openapi_url=None,    # disable default /openapi.json
 )
+
+
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui(req: Request):
+    root_path = req.scope.get("root_path", "").rstrip("/")
+    return get_swagger_ui_html(
+        openapi_url=f"{root_path}/openapi.json",
+        title=app.title,
+    )
+
+
+@app.get("/openapi.json", include_in_schema=False)
+async def custom_openapi():
+    return JSONResponse(get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    ))
 
 
 class StoreRequest(BaseModel):
