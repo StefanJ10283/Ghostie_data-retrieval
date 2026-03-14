@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
@@ -39,7 +39,7 @@ app = FastAPI(
 
 
 @app.get("/docs", include_in_schema=False)
-async def custom_swagger_ui(req: Request):
+async def custom_swagger_ui():
     # Use a relative URL so the browser resolves it correctly regardless of
     # the API Gateway stage prefix (e.g. /Prod/docs → /Prod/openapi.json).
     # Mangum doesn't reliably populate root_path, so we avoid relying on it.
