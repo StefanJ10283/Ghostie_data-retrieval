@@ -12,7 +12,7 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
-          DYNAMODB_REGION: us-east-1
+          DYNAMODB_REGION: ap-southeast-2
       Policies:
         - Statement:
             - Effect: Allow
@@ -25,8 +25,8 @@ Resources:
                 - dynamodb:Scan
                 - dynamodb:DescribeTable
               Resource:
-                - arn:aws:dynamodb:us-east-1:654654428204:table/hash_keys
-                - arn:aws:dynamodb:us-east-1:654654428204:table/scraped_data
+                - arn:aws:dynamodb:ap-southeast-2:146558977325:table/hash_keys
+                - arn:aws:dynamodb:ap-southeast-2:146558977325:table/scraped_data
       Events:
         ApiCatchAll:
           Type: Api
