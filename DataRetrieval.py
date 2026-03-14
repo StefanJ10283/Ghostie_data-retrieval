@@ -28,10 +28,14 @@ dynamodb = boto3.resource(
 hash_keys_table    = dynamodb.Table("hash_keys")     # PK: business_key (String)
 scraped_data_table = dynamodb.Table("scraped_data")  # PK: hash_key     (String)
 
+_root_path = "/Prod" if os.environ.get("AWS_LAMBDA_FUNCTION_NAME") else ""
+
 app = FastAPI(
     title="Ghostie Data Retrieval API",
     description="Retrieves collected data for a business and uses hashing to detect if data has changed since last retrieval.",
     version="2.0.0",
+    root_path=_root_path,
+    servers=[{"url": _root_path}] if _root_path else [{"url": "/"}],
     docs_url=None,       # disable default /docs — we serve a custom one below
     redoc_url=None,      # disable default /redoc
     openapi_url=None,    # disable default /openapi.json
