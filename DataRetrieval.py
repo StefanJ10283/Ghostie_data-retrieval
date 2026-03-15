@@ -249,6 +249,20 @@ def store(payload: StoreRequest):
     }
 
 
+@app.get("/companies")
+def list_companies():
+    """List all unique companies that have ever been collected."""
+    try:
+        response = hash_keys_table.scan()
+        items = response.get("Items", [])
+        return {
+            "count":     len(items),
+            "companies": items,
+        }
+    except ClientError as e:
+        raise HTTPException(status_code=500, detail=f"DynamoDB error (hash_keys scan): {e.response['Error']['Message']}")
+
+
 @app.get("/retrieve")
 def retrieve(business_name: str, location: str, category: str):
     """
