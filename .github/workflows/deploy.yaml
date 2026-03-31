@@ -1,12 +1,49 @@
-name: Deploy API
+name: Test and Deploy
 
 on:
   push:
     branches: [main]
 
 jobs:
-  deploy:
+  test:
+    name: Run Test Suite
     runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install application dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install test dependencies
+        run: pip install -r requirements-test.txt
+
+      - name: Run tests and generate HTML report
+        env:
+          CI: "true"
+          # Dummy credentials — DynamoDB is fully mocked in tests
+          AWS_ACCESS_KEY_ID: "testing"
+          AWS_SECRET_ACCESS_KEY: "testing"
+          AWS_SESSION_TOKEN: "testing"
+          AWS_DEFAULT_REGION: "ap-southeast-2"
+        run: pytest
+
+      - name: Upload test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report
+          path: tests/test-report.html
+
+  deploy:
+    name: Deploy to AWS Lambda
+    needs: test
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
