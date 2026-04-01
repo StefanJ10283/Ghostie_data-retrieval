@@ -22,9 +22,6 @@ jobs:
       - name: Install test dependencies
         run: pip install -r requirements-test.txt
 
-      - name: Install wkhtmltopdf
-        run: sudo apt-get install -y --fix-missing wkhtmltopdf
-
       - name: Lint with flake8
         run: flake8 DataRetrieval.py tests/
 
@@ -40,7 +37,7 @@ jobs:
 
       - name: Convert HTML report to PDF
         if: always()
-        run: wkhtmltopdf tests/test-report.html tests/test-report.pdf
+        run: python3 -m weasyprint tests/test-report.html tests/test-report.pdf
 
       - name: Upload test report
         uses: actions/upload-artifact@v4
