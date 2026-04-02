@@ -25,7 +25,17 @@ jobs:
       - name: Lint with flake8
         run: flake8 DataRetrieval.py tests/
 
-      - name: Run tests and generate HTML report
+      - name: Run unit tests and generate HTML report
+        env:
+          CI: "true"
+          AWS_ACCESS_KEY_ID: "testing"
+          AWS_SECRET_ACCESS_KEY: "testing"
+          AWS_SESSION_TOKEN: "testing"
+          AWS_DEFAULT_REGION: "ap-southeast-2"
+        run: pytest tests/test_utils.py --html=tests/unit-test-report.html
+
+      - name: Run integration tests and generate HTML report
+        if: always()
         env:
           CI: "true"
           # Dummy credentials — DynamoDB is fully mocked in tests
@@ -33,7 +43,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: "testing"
           AWS_SESSION_TOKEN: "testing"
           AWS_DEFAULT_REGION: "ap-southeast-2"
-        run: pytest
+        run: pytest tests/test_api.py --html=tests/integration-test-report.html
 
       - name: Install Playwright and Chromium
         if: always()
@@ -41,7 +51,7 @@ jobs:
           playwright install chromium
           playwright install-deps chromium
 
-      - name: Convert HTML report to PDF
+      - name: Convert HTML reports to PDF
         if: always()
         run: |
           python3 -c "
@@ -49,19 +59,27 @@ jobs:
           import os
           with sync_playwright() as p:
               browser = p.chromium.launch()
-              page = browser.new_page()
-              page.goto('file://' + os.path.abspath('tests/test-report.html'))
-              page.wait_for_load_state('networkidle')
-              page.pdf(path='tests/test-report.pdf', format='A4', print_background=True)
+              for name in ['unit-test-report', 'integration-test-report']:
+                  page = browser.new_page()
+                  page.goto('file://' + os.path.abspath(f'tests/{name}.html'))
+                  page.wait_for_load_state('networkidle')
+                  page.pdf(path=f'tests/{name}.pdf', format='A4', print_background=True)
               browser.close()
           "
 
-      - name: Upload test report
+      - name: Upload unit test report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-report
-          path: tests/test-report.pdf
+          name: unit-test-report
+          path: tests/unit-test-report.pdf
+
+      - name: Upload integration test report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-report
+          path: tests/integration-test-report.pdf
 
   deploy:
     name: Deploy to AWS Lambda
